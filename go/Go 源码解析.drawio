@@ -48,10 +48,140 @@
     </mxGraphModel>
   </diagram>
   <diagram id="lQKhEyVIY3_KC18GdJg9" name="findRunnable() 调度函数">
-    <mxGraphModel dx="1018" dy="655" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="2672" dy="1824" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18px" value="&lt;b&gt;Go runtime.findRunnable() 全流程&lt;/b&gt;&lt;br&gt;按源码执行顺序 · 所有获取G关键节点" vertex="1">
+          <mxGeometry height="40" width="700" x="390" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e5f6ff;strokeColor=#0066cc" value="【函数入口】findRunnable()&lt;br&gt;运行在M的g0系统栈上" vertex="1">
+          <mxGeometry height="60" width="200" x="490" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e5f6ff;strokeColor=#0066cc" value="前置检查&lt;br&gt;1. GC等待？执行gcstopm()&lt;br&gt;2. 安全点函数？runSafePointFn()" vertex="1">
+          <mxGeometry height="70" width="200" x="490" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0f5;strokeColor=#cc0066" value="【阶段1】特殊非普通G（tryWakeP=true）" vertex="1">
+          <mxGeometry height="50" width="200" x="490" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f5;strokeColor=#cc0066" value="1. 尝试获取Trace Reader G&lt;br&gt;找到 → 直接return" vertex="1">
+          <mxGeometry height="60" width="220" x="240" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff0f5;strokeColor=#cc0066" value="2. 尝试获取GC Worker G&lt;br&gt;找到 → 直接return" vertex="1">
+          <mxGeometry height="60" width="220" x="520" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-7" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e5;strokeColor=#ff6600" value="【阶段2】公平性检查&lt;br&gt;每61次调度tick，强制查全局队列&lt;br&gt;globrunqget() 找到 → 直接return" vertex="1">
+          <mxGeometry height="70" width="200" x="490" y="560" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-8" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#6600cc" value="【阶段3】核心快速路径（无锁优先）" vertex="1">
+          <mxGeometry height="50" width="200" x="490" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#6600cc" value="1. 唤醒Finalizer G&lt;br&gt;ready()入队，不直接return" vertex="1">
+          <mxGeometry height="60" width="220" x="240" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#6600cc" value="2. 检查当前P本地队列&lt;br&gt;runqget() 找到 → 直接return" vertex="1">
+          <mxGeometry height="60" width="220" x="520" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-11" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#6600cc" value="3. 正式检查全局队列&lt;br&gt;globrunqget() 找到 → 直接return" vertex="1">
+          <mxGeometry height="60" width="220" x="800" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e5f5e5;strokeColor=#009933" value="【阶段4】非阻塞网络轮询&lt;br&gt;netpoll(0) 查IO就绪的G&lt;br&gt;找到 → 直接return" vertex="1">
+          <mxGeometry height="70" width="200" x="490" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-13" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0099cc" value="【阶段5】Work-Stealing 工作窃取&lt;br&gt;stealWork() 偷其他P的G&lt;br&gt;偷到 → 直接return" vertex="1">
+          <mxGeometry height="70" width="200" x="490" y="890" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-14" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0099cc" value="发现新工作 → goto top 重查" vertex="1">
+          <mxGeometry height="50" width="180" x="740" y="890" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f3e6;strokeColor=#b45f06" value="【阶段6】空闲兜底逻辑" vertex="1">
+          <mxGeometry height="50" width="200" x="490" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-16" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f9f3e6;strokeColor=#b45f06" value="1. 尝试获取Idle GC Worker G&lt;br&gt;找到 → 直接return" vertex="1">
+          <mxGeometry height="60" width="220" x="340" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f9f3e6;strokeColor=#b45f06" value="2. 特殊平台唤醒 beforeIdle()&lt;br&gt;找到G → 直接return&lt;br&gt;有就绪事件 → goto top" vertex="1">
+          <mxGeometry height="60" width="220" x="620" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#666666" value="【阶段7】释放P前最后检查&lt;br&gt;加锁查全局队列&lt;br&gt;globrunqget() 找到 → 直接return" vertex="1">
+          <mxGeometry height="70" width="200" x="490" y="1130" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-19" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828" value="【阶段8】Spinning退出安全重检查&lt;br&gt;对应 issue #43997" vertex="1">
+          <mxGeometry height="50" width="200" x="490" y="1220" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-20" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828" value="1. 重查全局队列&lt;br&gt;找到 → 直接return" vertex="1">
+          <mxGeometry height="50" width="220" x="240" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-21" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828" value="2. 重查其他P队列&lt;br&gt;有G → acquirep + goto top" vertex="1">
+          <mxGeometry height="50" width="220" x="520" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-22" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828" value="3. 重查Idle GC工作&lt;br&gt;找到 → 直接return" vertex="1">
+          <mxGeometry height="50" width="220" x="800" y="1290" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-23" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#3949ab" value="【阶段9】阻塞等待" vertex="1">
+          <mxGeometry height="50" width="200" x="490" y="1360" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-24" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#3949ab" value="1. 阻塞netpoll(delay)&lt;br&gt;等待IO就绪/定时器到期" vertex="1">
+          <mxGeometry height="60" width="220" x="340" y="1430" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-25" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#3949ab" value="2. 拿到IO就绪G&lt;br&gt;有空闲P → 直接return&lt;br&gt;无空闲P → injectglist入队" vertex="1">
+          <mxGeometry height="60" width="220" x="620" y="1430" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3f3f3;strokeColor=#666666" value="无任何G → stopm() 休眠M&lt;br&gt;唤醒后 goto top 重查" vertex="1">
+          <mxGeometry height="60" width="200" x="490" y="1510" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-27" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e5f6ff;strokeColor=#0066cc" value="【闭环】找到G → 返回给schedule()执行" vertex="1">
+          <mxGeometry height="60" width="200" x="490" y="1600" as="geometry" />
+        </mxCell>
+        <mxCell id="huq0AEjuyUpll_fROOWz-28" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-2" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-3" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-29" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-3" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-4" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-30" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-4" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-5" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-31" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-4" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-6" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-32" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-5" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-7" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-33" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-6" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-7" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-34" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-7" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-8" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-35" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-8" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-9" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-36" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-8" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-10" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-37" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-8" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-11" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-38" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-9" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-12" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-39" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-10" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-12" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-40" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-11" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-12" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-41" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-12" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-13" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-42" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-13" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-14" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-43" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-13" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-15" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-44" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-15" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-16" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-45" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-15" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-17" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-46" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-16" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-18" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-47" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-17" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-18" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-48" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-18" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-19" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-49" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-19" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-20" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-50" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-19" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-21" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-51" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-19" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-22" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-52" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-20" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-23" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-53" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-21" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-23" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-54" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-22" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-23" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-55" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-23" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-24" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-56" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-23" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-25" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-57" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-24" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-26" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-58" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-25" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-26" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-59" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-26" style="endArrow=block;html=1;strokeWidth=1.5" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-60" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-14" style="endArrow=block;html=1;strokeWidth=1.5;dashPattern=4 4" target="huq0AEjuyUpll_fROOWz-3" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-61" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-17" style="endArrow=block;html=1;strokeWidth=1.5;dashPattern=4 4" target="huq0AEjuyUpll_fROOWz-3" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-62" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-21" style="endArrow=block;html=1;strokeWidth=1.5;dashPattern=4 4" target="huq0AEjuyUpll_fROOWz-3" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-63" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-26" style="endArrow=block;html=1;strokeWidth=1.5;dashPattern=4 4" target="huq0AEjuyUpll_fROOWz-2" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-64" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-5" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#cc0066" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-65" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-6" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#cc0066" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-66" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-7" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#ff6600" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-67" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-10" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#6600cc" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-68" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-11" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#6600cc" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-69" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-12" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#009933" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-70" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-13" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#0099cc" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-71" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-16" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#b45f06" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-72" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-17" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#b45f06" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-73" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-18" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#666666" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-74" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-20" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#c62828" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-75" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-22" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#c62828" target="huq0AEjuyUpll_fROOWz-27" />
+        <mxCell id="huq0AEjuyUpll_fROOWz-76" edge="1" parent="1" source="huq0AEjuyUpll_fROOWz-25" style="endArrow=block;html=1;strokeWidth=1.5;strokeColor=#3949ab" target="huq0AEjuyUpll_fROOWz-27" />
       </root>
     </mxGraphModel>
   </diagram>
