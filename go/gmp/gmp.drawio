@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36" version="29.6.6">
+  <diagram name="GMP-Web-Flow" id="c-EZcUv4KgubTrTa8CDM">
+    <mxGraphModel dx="26008" dy="19475" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-102" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=20px" value="&lt;b&gt;Go Web 服务：main 启动 → 请求到达 → GMP 调度全流程&lt;/b&gt;" vertex="1">
+          <mxGeometry height="40" width="1000" x="630" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-142" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-103" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="BUliArwtc89pIjMwrpfR-104">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-103" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e5f6ff;strokeColor=#0066cc" value="程序启动&amp;nbsp;&amp;nbsp;&lt;div&gt;runtime/asm_arm64.s 文件&lt;/div&gt;&lt;div&gt;&lt;br&gt;runtime·rt0_go（汇编入口）&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="180" x="440" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-104" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f0faff;strokeColor=#0066cc" value="初始化 M0 + G0&lt;br&gt;双向绑定" vertex="1">
+          <mxGeometry height="60" width="140" x="680" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-105" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f0faff;strokeColor=#0066cc" value="初始化 P0&lt;br&gt;procresize()" vertex="1">
+          <mxGeometry height="60" width="140" x="880" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-106" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f0faff;strokeColor=#0066cc" value="M0 ↔ P0 绑定&lt;br&gt;mstart() + schedule()" vertex="1">
+          <mxGeometry height="60" width="160" x="1080" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-107" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e5;strokeColor=#ff6600" value="执行用户 main 函数&lt;br&gt;http.ListenAndServe" vertex="1">
+          <mxGeometry height="60" width="240" x="630" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-108" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e5;strokeColor=#ff6600" value="监听协程运行&lt;br&gt;阻塞在 syscall.Accept" vertex="1">
+          <mxGeometry height="60" width="220" x="930" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-109" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2e5;strokeColor=#ff6600" value="G 进入 Gwaiting 状态&lt;br&gt;M 解绑 G，调度其他 G" vertex="1">
+          <mxGeometry height="60" width="200" x="1200" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-110" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e5f5e5;strokeColor=#009933" value="客户端请求到达&lt;br&gt;内核唤醒 Accept" vertex="1">
+          <mxGeometry height="60" width="220" x="530" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-111" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f0fff0;strokeColor=#009933" value="监听 G 被唤醒&lt;br&gt;Gwaiting → Grunnable" vertex="1">
+          <mxGeometry height="60" width="180" x="800" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-112" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e5f5e5;strokeColor=#009933" value="go c.serve()&lt;br&gt;runtime.newproc() 创建新 G" vertex="1">
+          <mxGeometry height="60" width="220" x="1020" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-113" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0f5;strokeColor=#cc0066" value="新 G 加入 P 本地队列&lt;br&gt;满则放入 schedt.globrunq" vertex="1">
+          <mxGeometry height="60" width="260" x="580" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-114" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff0f5;strokeColor=#cc0066" value="M 执行调度循环 schedule()&lt;br&gt;获取可运行 G" vertex="1">
+          <mxGeometry height="60" width="200" x="890" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-115" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff0f5;strokeColor=#cc0066" value="M 绑定 G&lt;br&gt;G 状态变为 Grunning" vertex="1">
+          <mxGeometry height="60" width="200" x="1130" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-116" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#6600cc" value="执行 HTTP 业务 Handler" vertex="1">
+          <mxGeometry height="60" width="220" x="630" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-117" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#6600cc" value="无阻塞：快速执行完成&lt;br&gt;G 结束、回收至 gfree" vertex="1">
+          <mxGeometry height="60" width="200" x="900" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-118" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f0ff;strokeColor=#6600cc" value="有阻塞(IO/chan/sleep)&lt;br&gt;G 进入 Gwaiting" vertex="1">
+          <mxGeometry height="60" width="200" x="1150" y="800" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-119" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#faf4ff;strokeColor=#6600cc" value="M 解绑 G&lt;br&gt;重新调度其他 G" vertex="1">
+          <mxGeometry height="40" width="200" x="1150" y="880" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-120" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0099cc" value="阻塞结束(IO完成/超时)&lt;br&gt;runtime.goready 唤醒 G" vertex="1">
+          <mxGeometry height="60" width="300" x="730" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-121" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f9ff;strokeColor=#0099cc" value="G 重新变为 Grunnable&lt;br&gt;加入 P 队列等待调度" vertex="1">
+          <mxGeometry height="60" width="240" x="1080" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="BUliArwtc89pIjMwrpfR-122" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-103" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-104" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-123" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-104" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-105" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-124" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-105" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-106" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-125" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-106" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-107" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-126" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-107" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-108" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-127" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-108" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-109" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-128" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-109" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-110" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-129" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-110" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-111" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-130" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-111" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-112" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-131" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-112" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-113" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-132" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-113" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-114" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-133" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-114" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-115" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-134" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-115" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-116" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-135" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-116" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-117" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-136" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-116" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-118" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-137" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-118" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-119" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-138" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-119" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-120" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-139" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-120" style="endArrow=block;html=1" target="BUliArwtc89pIjMwrpfR-121" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-140" edge="1" parent="1" source="BUliArwtc89pIjMwrpfR-121" style="endArrow=block;html=1;dashPattern=1 1" target="BUliArwtc89pIjMwrpfR-113" />
+        <mxCell id="BUliArwtc89pIjMwrpfR-141" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f9f9;strokeColor=#999" value="GMP 核心思想：&lt;br&gt;M 必须绑定 P 才能运行 G&lt;br&gt;G 阻塞时 M 不会空闲&lt;br&gt;高并发 = 百万 G 少量 M 线程" vertex="1">
+          <mxGeometry height="80" width="500" x="730" y="1050" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
